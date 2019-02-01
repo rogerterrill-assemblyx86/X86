@@ -1,32 +1,32 @@
-TITLE Data Definitions	   (AddSub.asm)
+TITLE Subtracting Three Integers	   (AddSub.asm)
 
-COMMENT ! 2. Data Definitions
-    Write a program that contains a definition of each data type listed in Table 3-2 in Section 3.4.
-    Initialize each variable to a value that is consistent with its data type.
+COMMENT ! 
+    place 1 in ecx register
+    place 3 in edx register
+    add ecx and edx registers and place result in ecx.
+    subtract edx from ecx and place result in ebx.
+
+    move 10 to eax
+
+    Display results in register.
 !
 
 INCLUDE Irvine32.inc
 
-
-.data
-
-val1 BYTE 'A'
-val2 SBYTE -128
-val3 WORD 0FFFFh
-val4 SWORD 8402h
-val5 DWORD 0FFFFFFFFh
-val6 SDWORD -80000000h
-val7 FWORD 281474976710655
-val8 QWORD 1234567812345678h
-val9 TBYTE 1208925819614629174706175
-val10 REAL4 -1.2
-val11 REAL8 3.2E-260
-val12 REAL10 4.6E+4096
-
 .code
 main PROC
 
+    mov	  ecx,1		   ; ECX = 1
+    mov	  edx,3		   ;	EDX = 3
+    add	  ecx,edx		   ; ECX = 4
+    sub	  ecx, edx	   ; ECX = 1
+    mov	  ebx, ecx	   ; EBX = 1
+    mov	  eax, 10		   ; EAX = 10
+
+
+
+    call	  DumpRegs
 
     exit
 main ENDP
-END main
+END main 
