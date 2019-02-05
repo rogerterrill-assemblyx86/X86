@@ -1,92 +1,60 @@
 TITLE ASCII Addition		(ch7exercies2.asm)
 
 COMMENT ! 
-    1. Extended Addition Procedure
-	Modify the Extended_Add procedure in Section 7.5.2 to add two 256-bit (32-byte) integers.
+    10. Display ASCII Decimal
+	Write a procedure named WriteScaled that outputs a decimal ASCII number with an implied decimal
+	point. Suppose the following number were defined as follows, where DECIMAL_OFFSET
+	indicates that the decimal point must be inserted five positions from the right side of the number:
+	DECIMAL_OFFSET = 5
+	.data
+	decimal_one BYTE "100123456789765"
+	WriteScaled would display the number like this:
+	1001234567.89765
+	When calling WriteScaled, pass the number’s offset in EDX, the number length in ECX, and the
+	decimal offset in EBX. Write a test program that displays three numbers of different sizes.
 !
 
 INCLUDE Irvine32.inc
 
+DECIMAL_OFFSET = 5						; offset from right of string
 .data
-op1 BYTE 34h,12h,98h,74h,06h,0A4h,0B2h,0A2h,34h,12h,98h,74h,06h,0A4h,0B2h,0A2h,34h,12h,98h,74h,06h,0A4h,0B2h,0A2h,34h,12h,98h,74h,06h,0A4h,0B2h,0A2h
-op2 BYTE 02h,45h,23h,00h,00h,87h,10h,80h,02h,45h,23h,00h,00h,87h,10h,80h,02h,45h,23h,00h,00h,87h,10h,80h,02h,45h,23h,00h,00h,87h,10h,80h
+decimal_one BYTE "100123456789765"			; 1001234567.89765
 
-sum BYTE 33 dup(0) 	; = 0122C32B0674BB5736h
+buffer BYTE (SIZEOF decimal_one + 1) DUP(0),0
 
 .code
 main PROC
 
-	mov	esi,OFFSET op1		; first operand
-	mov	edi,OFFSET op2		; second operand
-	mov	ebx,OFFSET sum		; sum operand
-	mov	ecx,LENGTHOF op1   	; number of bytes
-	call	Extended_Add
+; Start at the last digit position.
 
-; Display the sum.
-	
-	mov  esi,OFFSET sum
-	mov  ecx,LENGTHOF sum
-	call	Display_Sum
-	call Crlf
+	mov esi,0	; position index
+	mov	ecx,SIZEOF decimal_one		; Number length
+	mov edx,OFFSET decimal_one		; Offset of number	
+	mov ebx,DECIMAL_OFFSET			; Number Offset
+	sub ebx,ecx
+	neg ebx
+
+	Call WriteScaled
 	
 	exit
 main ENDP
 
-;--------------------------------------------------------
-Extended_Add PROC
-;
-; Calculates the sum of two extended integers stored 
-; as arrays of bytes.
-; Receives: ESI and EDI point to the two integers,
-; EBX points to a variable that will hold the sum, and
-; ECX indicates the number of bytes to be added.
-; Storage for the sum must be one byte longer than the
-; input operands.
-; Returns: nothing
-;--------------------------------------------------------
-	pushad
-	clc                			; clear the Carry flag
-
-L1:	mov	al,[esi]      			; get the first integer
-	adc	al,[edi]      			; add the second integer
-	pushfd              		; save the Carry flag
-	mov	[ebx],al      			; store partial sum
-	add	esi,1         			; advance all 3 pointers
-	add	edi,1
-	add	ebx,1
-	popfd               		; restore the Carry flag
-	loop	L1           			; repeat the loop
-
-	mov	byte ptr [ebx],0		; clear high byte of sum
-	adc	byte ptr [ebx],0		; add any leftover carry
-	popad
-	ret
-Extended_Add ENDP
-
-;-----------------------------------------------------------
-Display_Sum PROC
-;
-; Displays a large integer that is stored in little endian 
-; order (LSB to MSB). The output displays the array in 
-; hexadecimal, starting with the most significant byte.
-; Receives: ESI points to the array, ECX is the array size
-; Returns: nothing
-;-----------------------------------------------------------
-	pushad
+writeScaled PROC
+L1:
+	.IF(esi == ebx)
+		mov al,'.'
+		call WriteChar
+	.ENDIF
+	mov al,decimal_one[esi]
 	
-	; point to the last array element
-	add esi,ecx
-	sub esi,TYPE BYTE
-	mov ebx,TYPE BYTE
-	
-L1:	mov  al,[esi]			; get an array byte
-	call WriteHexB			; display it
-	sub  esi,TYPE BYTE		; point to previous byte
+	call WriteChar
+	inc esi
 	loop L1
 
-	popad
-	ret
-Display_Sum ENDP
+	
+	call Crlf
 
+
+writeScaled ENDP
 
 END main
